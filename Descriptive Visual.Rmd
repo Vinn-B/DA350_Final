@@ -1,0 +1,117 @@
+---
+title: "Data Exploration"
+output: html_document
+date: "2023-12-02"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+```
+
+```{r message=FALSE, warning=FALSE}
+online_retail_II <- read.csv("online_retail_II.csv")
+data <- online_retail_II
+```
+
+```{r message=FALSE, warning=FALSE}
+# Aggregating the data to get the number of purchases per country
+country_data <- data %>%
+  group_by(Country) %>%
+  summarise(Purchases = n())
+```
+
+```{r message=FALSE, warning=FALSE}
+library(plotly)
+
+# Convert ggplot to plotly
+p <- ggplot(country_data, aes(x = reorder(Country, Purchases), y = Purchases)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  theme_light() +
+  labs(title = "Purchases by Country",
+       x = "Country",
+       y = "Number of Purchases") +
+  coord_flip()
+
+# Convert to an interactive plot
+ggplotly(p)
+
+```
+
+
+#VISUAL 2
+```{r message=FALSE, warning=FALSE}
+# Data Preprocessing and Metric Calculation
+data <- data %>%
+  mutate(TotalValue = Quantity * Price) %>%
+  group_by(`Customer.ID`) %>%
+  summarise(TotalMonetaryValue = sum(TotalValue),
+            PurchaseFrequency = n()) %>%
+  ungroup()
+
+# Visualization
+ggplot(data, aes(x = PurchaseFrequency, y = TotalMonetaryValue)) +
+  geom_point(alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "Customer Purchase Frequency vs Monetary Value",
+       x = "Purchase Frequency",
+       y = "Total Monetary Value")
+```
+```{r message=FALSE, warning=FALSE}
+library(ggplot2)
+
+# Assuming data is your dataframe with PurchaseFrequency and TotalMonetaryValue
+
+# Apply log transformation
+ggplot(data, aes(x = log1p(PurchaseFrequency), y = log1p(TotalMonetaryValue))) +
+  geom_point(alpha = 0.3) +  # Adjust transparency with alpha
+  theme_minimal() +
+  labs(title = "Log-Transformed Customer Purchase Frequency vs Monetary Value",
+       x = "Log(Purchase Frequency + 1)",
+       y = "Log(Total Monetary Value + 1)")
+
+```
+
+```{r message=FALSE, warning=FALSE}
+library(plotly)
+
+# Assuming data is your dataframe with PurchaseFrequency and TotalMonetaryValue columns
+
+# Create a ggplot2 scatter plot
+p <- ggplot(data, aes(x = PurchaseFrequency, y = TotalMonetaryValue)) +
+  geom_point(alpha = 0.5) +
+  theme_minimal() +
+  labs(title = "Interactive Customer Purchase Frequency vs Monetary Value",
+       x = "Purchase Frequency",
+       y = "Total Monetary Value")
+
+# Convert to an interactive plotly object
+p_interactive <- ggplotly(p)
+
+# You can now view this plot in an R environment that supports HTML widgets
+# or save it as an HTML file to share with others
+p_interactive
+
+
+```
+
+```{r message=FALSE, warning=FALSE}
+# Preprocess the data
+features <- c("Quantity", "Price")
+X <- data[, features]
+
+# Standardize the features
+scaled_X <- scale(X)
+
+# Perform PCA using prcomp
+pca_result <- prcomp(scaled_X, center = TRUE, scale. = TRUE)
+
+# Scatter plot of the first two principal components
+plot(pca_result$x[, 1], pca_result$x[, 2], xlab = "Principal Component 1", ylab = "Principal Component 2", main = "Scatter Plot of Principal Components")
+```
+
